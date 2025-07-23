@@ -1,0 +1,120 @@
+---
+title: "R_reproducibility"
+author: "Nhung"
+date: "2025-04-01"
+output: html_document
+---
+
+```{r setup, include = FALSE}
+
+# required packages for reproducibility in R
+library(here)
+library(renv)
+library(rticles)
+library(devtools)
+library(roxygen2)
+library(gitcreds)
+
+if (!require("devtools")) install.packages("devtools")
+devtools::install_github("benmarwick/rrtools")
+
+library(rrtools) # not yet installed
+library(tinytex)
+library(usethis)
+
+
+# test the configuration for git/github/Rstudio
+usethis::create_github_token()  # create a token
+gitcreds::gitcreds_set()  # replace the token
+usethis::gh_token_help() 
+usethis::git_sitrep() # check the configuration of git/github/rstudio
+
+```
+## Reproducibility (for research findings)
+
+*Reproducibility means obtaining the same result by someone else given the same data and code.*
+
+Robustness (durableness) means obtaining the same result from the same data using a different method. Exp: using different stats method on the same data to have the same conclusion on a hypothesis.
+
+Replicability (of a research finding on different datasets) means obtaining the same result from an independent dataset using the same method. Exp: using the same bioinformatic pipeline on different datasets to achieve a same cataloge of mutations for Mtb.
+
+Note for "here" package to make portable paths: to create absolute paths which runs the codes from paths that are relative to the root directory (a way to declare where the root directory is), using in 2 situations: 
+
+(1) to fix the inconsistency of root directory during knit as knitting will automatically define the root working directory being the location of the knitted file, so here:here() will help to redefine the root directory by providing its relative path; 
+
+(2) working with a script not inside the current project, so here::i_am() function will help to declare the relative path of the script to the its root project.
+
+```{r here package}
+# use here:here(.../...) to define the root directory by going back and searching the Rproj
+
+# use here:i_am(.../...) before the here:here(.../...) to define the relative path of the root directory of the project
+
+
+```
+
+```{r compendium}
+# first create a git-managed repo, then use the following codes to create a research compendium for the project
+
+rrtools::use_compendium(simple = FALSE)  # create the skeleton
+rrtools::add_dependencies_to_description()  # add the description
+usethis::use_mit_license(copyright_holder = "Nhung")  # add licence
+rrtools::use_readme_qmd()  # add the readme.Rmd
+rrtools::use_analysis() # create the analysis folder, choose to make the file being tracked by git or not
+
+# complex R code should be written as functions, make it as a package and documenting code,  put in R sub folder (codes can be written in code chunks, scripts or functions)
+
+```
+
+
+```{r renv }
+# to create a project-specific R environment with its own library
+
+renv::init() # create the scaffold of the project, use once at the beginning 
+renv::status() # use many time when trying to install new packages in the project
+renv::snapshot() # to update the packages into the lockfile
+
+# renv for reproducibility: first need to download a reproducible project (just need to share the lockfile and activate.R file)
+
+renv::restore()
+
+```
+
+
+```{r docker }
+
+```
+```{r useful functions}
+usethis::create_from_github()  # clone the repo
+renv::install("tidyverse") # install a package using renv
+
+## {targets} pipeline
+
+# step 1: turn a bunch of relevant codes into a function (such as a function to read and clean data, a function to create a bar plot, a function to create a scatter plot), then document the functions using {roxygen} (all the functions should be saved into a helper_function.R file and put into the R folder; to use them just need to source this script containing all the functions)
+
+# step 2: turn the main script into a {targets} pipeline, using the package "targets". The pipeline is saved in a _targets.R file in the main directory (use the command below for targets configuration, setting up a custom directory)
+
+targets::tar_config_set(script = "analysis/_targets.R", store = "analysis/_targets")
+targets::tar_make()
+targets::tar_read()
+
+# using {assertr} for data checking
+
+```
+
+
+
+
+
+```{r cars, echo = FALSE}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
