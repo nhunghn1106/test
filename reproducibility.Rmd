@@ -29,6 +29,8 @@ gitcreds::gitcreds_set()  # replace the token
 usethis::gh_token_help() 
 usethis::git_sitrep() # check the configuration of git/github/rstudio
 
+credentials::set_github_pat() # for check
+
 ```
 ## Reproducibility (for research findings)
 
